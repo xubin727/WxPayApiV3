@@ -17,6 +17,11 @@ class Pay {
     protected $loger = null;
     protected $httpClient = null;
 
+    /**
+     * Native 支付方式
+     * @param Config $config
+     * @return \Xubin\WxPayApiV3\Native\Pay
+     */
     public function __construct(Config $config)
     {
         $this->config = $config;
@@ -42,15 +47,26 @@ class Pay {
         return $this;
     }
 
+    /**
+     * 设置支付日志路径
+     * @param string $path
+     * @return \Xubin\WxPayApiV3\Native\Pay
+     */
     public function setLogPath($path)
     {
 //         $logPath = realpath( Yii::app()->basePath . "/../runtime/paylogs" ) . '/nativepaylog_' .date('Y_m_d').'.log';
         $this->logPath = $path;
+        
+        $this->initLoger();
 
         return $this;
     }
 
-    public function initLoger()
+    /**
+     * 初始化日志对象
+     * @return \xubin\wxpayapi\Loger\Log
+     */
+    protected function initLoger()
     {
         //初始化日志
         $logHandler= new CLogFileHandler($this->logPath);
@@ -59,7 +75,17 @@ class Pay {
         return $this->loger;
     }
 
-    public function createOrder($orderId, $notifyUrl, $orderDesc, $params=[], $headers=[])
+    /**
+     * 生成Native方式支付订单
+     * @param number $amount 支付金额
+     * @param string $orderId 商家订单ID
+     * @param string $notifyUrl 支付成功后的回调地址
+     * @param string $orderDesc 订单描述信息
+     * @param array $params 其它参数
+     * @param array $headers 支付请求向支付服务器发送的头信息
+     * @return mixed|array 成功则返回正常的json信息，否则返回一个空的数组
+     */
+    public function createOrder($amount, $orderId, $notifyUrl, $orderDesc, $params=[], $headers=[])
     {
 
 //         $loger = $this->setLogPath($logPath)->initLoger();
