@@ -1,0 +1,124 @@
+<?php
+namespace Xubin\WxPayApiV3\Native;
+
+use GuzzleHttp\Exception\RequestException;
+use \GuzzleHttp\Client;
+use \GuzzleHttp\HandlerStack;
+use WechatPay\GuzzleMiddleware\WechatPayMiddleware;
+use xubin\wxpayapi\Loger\Log;
+use xubin\wxpayapi\Loger\CLogFileHandler;
+
+
+class Pay {
+
+    protected $config = null;
+    protected $param = null;
+    protected $logPath = '';
+    protected $loger = null;
+    protected $httpClient = null;
+
+    public function __construct(Config $config)
+    {
+        $this->config = $config;
+
+        $merchantId = $this->config->getMerchantId();
+        $merchantSerialNumber = $this->config->getMerchantSerialNumber();
+        $merchantPrivateKey = $this->config->getMerchantPrivateKey();
+        $wechatpayCertificate = $this->config->getWechatpayCertificate();
+
+        // 构造一个WechatPayMiddleware
+        $wechatpayMiddleware = WechatPayMiddleware::builder()
+        ->withMerchant($merchantId, $merchantSerialNumber, $merchantPrivateKey) // 传入商户相关配置
+        ->withWechatPay([ $wechatpayCertificate ]) // 可传入多个微信支付平台证书，参数类型为array
+        ->build();
+
+        // 将WechatPayMiddleware添加到Guzzle的HandlerStack中
+        $stack = \GuzzleHttp\HandlerStack::create();
+        $stack->push($wechatpayMiddleware, 'wechatpay');
+
+        // 创建Guzzle HTTP Client时，将HandlerStack传入
+        $this->httpClient = new \GuzzleHttp\Client(['handler' => $stack]);
+
+        return $this;
+    }
+
+    public function setLogPath($path)
+    {
+//         $logPath = realpath( Yii::app()->basePath . "/../runtime/paylogs" ) . '/nativepaylog_' .date('Y_m_d').'.log';
+        $this->logPath = $path;
+
+        return $this;
+    }
+
+    public function initLoger()
+    {
+        //初始化日志
+        $logHandler= new CLogFileHandler($this->logPath);
+        $this->loger = Log::Init($logHandler, 15);
+
+        return $this->loger;
+    }
+
+    public function createOrder($orderId, $notifyUrl, $orderDesc, $params=[], $headers=[])
+    {
+
+//         $loger = $this->setLogPath($logPath)->initLoger();
+
+//         $prod_id = '123';
+        $this->loger->INFO($this->logPath);
+
+
+        // 接下来，正常使用Guzzle发起API请求，WechatPayMiddleware会自动地处理签名和验签
+        try {
+            $client = $this->httpClient;
+
+            $resp = $client->request('POST', 'https://api.mch.weixin.qq.com/v3/pay/transactions/native', [
+                'json' => [ // JSON请求体
+                    'appid' => 'wxa29c31411824dbee',
+                    'mchid' => $this->config->getMerchantId(),
+                    'description' => '测试',
+                    'out_trade_no' => $orderId,
+                    'notify_url' => $notifyUrl,
+                    'amount' => [ 'currency'=>'CNY', 'total' => 0.01 ],
+//                     'time_expire' => '', //从这个开始，后面的均为非必须项
+//                     'attach' => '',
+//                     'goods_tag' => '',
+//                     'detail' => [ 'cost_price'=>'', 'invoice_id'=>'' ],
+//                     'scene_info' => [
+//                         "store_info" => [
+//                             "address" => "广东省深圳市南山区科技中一道10000号",
+//                             "area_code" => "440305",
+//                             "name" => "腾讯大厦分店",
+//                             "id" => "0001"
+//                         ],
+//                         "device_id" => "013467007045764",
+//                         "payer_client_ip" => "14.23.150.211"
+//                     ],
+//                     'settle_info' => [ 'profit_sharing' => '' ],
+                ],
+                'headers' => [ 'Accept' => 'application/json' ]
+            ]);
+
+            $this->loger->INFO( $resp->getStatusCode().' '.$resp->getReasonPhrase() );
+            return json_decode($resp->getBody(), JSON_OBJECT_AS_ARRAY);
+
+
+        } catch (RequestException $e) {
+            // 进行错误处理
+            $this->loger->ERROR( $e->getMessage() );
+            if ($e->hasResponse()) {
+                $this->loger->ERROR( $e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase().' '.$e->getResponse()->getBody() );
+            }
+            return [];
+        }
+
+
+    }
+
+}
+
+
+
+
+
+
