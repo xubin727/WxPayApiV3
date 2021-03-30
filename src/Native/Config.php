@@ -32,4 +32,9 @@ abstract class Config {
      */
     public abstract function getWechatpayCertificate();
     
+    /**
+     * Appid
+     */
+    public abstract function getAppId();
+    
 }

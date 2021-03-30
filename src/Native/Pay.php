@@ -100,12 +100,12 @@ class Pay {
 
             $resp = $client->request('POST', 'https://api.mch.weixin.qq.com/v3/pay/transactions/native', [
                 'json' => [ // JSON请求体
-                    'appid' => 'wxa29c31411824dbee',
+                    'appid' => $this->config->getAppId(),
                     'mchid' => $this->config->getMerchantId(),
-                    'description' => '测试',
+                    'description' => $orderDesc,
                     'out_trade_no' => $orderId,
                     'notify_url' => $notifyUrl,
-                    'amount' => [ 'currency'=>'CNY', 'total' => 0.01 ],
+                    'amount' => [ 'currency'=>'CNY', 'total' => $amount ],
 //                     'time_expire' => '', //从这个开始，后面的均为非必须项
 //                     'attach' => '',
 //                     'goods_tag' => '',

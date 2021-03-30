@@ -46,6 +46,14 @@ class DemoConfig extends Config {
         return $wechatpayCertificate;
     }
     
+    /**
+     * Appid
+     */
+    public function getAppId()
+    {
+        return 'wxa29c31411824dbee';
+    }
+    
 }
 
 
