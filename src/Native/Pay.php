@@ -5,8 +5,8 @@ use GuzzleHttp\Exception\RequestException;
 use \GuzzleHttp\Client;
 use \GuzzleHttp\HandlerStack;
 use WechatPay\GuzzleMiddleware\WechatPayMiddleware;
-use xubin\wxpayapi\Loger\Log;
-use xubin\wxpayapi\Loger\CLogFileHandler;
+use Xubin\WxPayApiV3\Loger\Log;
+use Xubin\WxPayApiV3\Loger\CLogFileHandler;
 
 
 class Pay {

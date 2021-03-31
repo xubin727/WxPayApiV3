@@ -31,7 +31,7 @@ class DemoConfig extends Config {
      */
     public function getMerchantPrivateKey()
     {
-        $merchantPrivateKey = PemUtil::loadPrivateKey('‪D:/programs/wxpay/WXCertUtil/cert/apiclient_key.pem');
+        $merchantPrivateKey = PemUtil::loadPrivateKey(BASE_DIR. '/../../programs/wxpay/WXCertUtil/cert/apiclient_key.pem');
         
         return $merchantPrivateKey;
     }
@@ -41,7 +41,7 @@ class DemoConfig extends Config {
      */
     public function getWechatpayCertificate()
     {
-        $wechatpayCertificate = PemUtil::loadCertificate('‪D:/programs/wxpay/WXCertUtil/cert/apiclient_cert.pem');
+        $wechatpayCertificate = PemUtil::loadCertificate(BASE_DIR. '/../../programs/wxpay/WXCertUtil/cert/apiclient_cert.pem');
         
         return $wechatpayCertificate;
     }

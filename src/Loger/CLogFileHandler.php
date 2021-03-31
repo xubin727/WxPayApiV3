@@ -1,8 +1,7 @@
 <?php
 //以下为日志
-namespace xubin\wxpayapi\Loger;
+namespace Xubin\WxPayApiV3\Loger;
 
-use xubin\wxpayapi\Loger\ILogHandler;
 
 
 class CLogFileHandler implements ILogHandler

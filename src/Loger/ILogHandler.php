@@ -1,6 +1,6 @@
 <?php
 //以下为日志
-namespace xubin\wxpayapi\Loger;
+namespace Xubin\WxPayApiV3\Loger;
 
 
 interface ILogHandler
