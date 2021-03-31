@@ -21,7 +21,7 @@ class DemoConfig extends Config {
      */
     public function getMerchantSerialNumber()
     {
-        $merchantSerialNumber = '13BD2F544AC3E35816FC6149A7B4722DC67CD1D4';
+        $merchantSerialNumber = '26840DA97A7F37723233DD335613E1E95F9F32E9';
         
         return $merchantSerialNumber;
     }
