@@ -1,5 +1,5 @@
 <?php
-namespace xubin\wxpayapi\PhpQrCode;
+namespace Xubin\WxPayApiV3\PhpQrCode;
 /*
  * PHP QR Code encoder
  *
