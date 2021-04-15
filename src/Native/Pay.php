@@ -92,12 +92,19 @@ class Pay {
 
 //         $prod_id = '123';
         $this->loger->INFO($this->logPath);
-
+        
+        $str = json_encode([
+            'appid' => $this->config->getAppId(),
+            'mchid' => $this->config->getMerchantId(),
+            'description' => $orderDesc,
+            'out_trade_no' => $orderId,
+            'notify_url' => $notifyUrl,
+            'amount' => [ 'currency'=>'CNY', 'total' => $amount ],]);
 
         // 接下来，正常使用Guzzle发起API请求，WechatPayMiddleware会自动地处理签名和验签
         try {
             $client = $this->httpClient;
-
+            
             $resp = $client->request('POST', 'https://api.mch.weixin.qq.com/v3/pay/transactions/native', [
                 'json' => [ // JSON请求体
                     'appid' => $this->config->getAppId(),
@@ -124,18 +131,17 @@ class Pay {
                 ],
                 'headers' => [ 'Accept' => 'application/json' ]
             ]);
-
-            $this->loger->INFO( $resp->getStatusCode().' '.$resp->getReasonPhrase() );
+            $this->loger->INFO( $resp->getStatusCode().' '.$resp->getReasonPhrase());
             return json_decode($resp->getBody(), JSON_OBJECT_AS_ARRAY);
 
 
         } catch (RequestException $e) {
             // 进行错误处理
-            $this->loger->ERROR( $e->getMessage() );
+            $this->loger->ERROR( $e->getMessage().'json:' .$str );
             if ($e->hasResponse()) {
-                $this->loger->ERROR( $e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase().' '.$e->getResponse()->getBody() );
+                $this->loger->INFO( $e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase().' '.$e->getResponse()->getBody() );
             }
-            return [];
+            return json_decode($e->getResponse()->getBody(), JSON_OBJECT_AS_ARRAY);
         }
 
 

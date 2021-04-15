@@ -10,6 +10,10 @@ class CLogFileHandler implements ILogHandler
 	
 	public function __construct($file = '')
 	{
+	    $dir = dirname($file);
+	    if (!file_exists($dir)) {
+	        mkdir($dir, 775, true);
+	    }
 		$this->handle = fopen($file,'a');
 	}
 	

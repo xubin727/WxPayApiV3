@@ -51,7 +51,7 @@ class DemoConfig extends Config {
      */
     public function getAppId()
     {
-        return 'wxa29c31411824dbee';
+        return 'wxc1134a1cdd87716b';
     }
     
 }
