@@ -155,7 +155,9 @@ class Pay {
         
         $aes = new Aes($secretKey);
         $res = $aes->decryptToString($data['resource']['associated_data'], $data['resource']['nonce'], $data['resource']['ciphertext']);
-        var_dump( $res );
+        
+        $this->loger->DEBUG( json_encode($res) );
+        
         return $res;
     }
 
