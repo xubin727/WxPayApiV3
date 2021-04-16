@@ -11,7 +11,7 @@ class DemoConfig extends Config {
      */
     public function getMerchantId()
     {
-        $merchantId = '1605721228';
+        $merchantId = '16057765';
         
         return $merchantId;
     }
@@ -21,7 +21,7 @@ class DemoConfig extends Config {
      */
     public function getMerchantSerialNumber()
     {
-        $merchantSerialNumber = '26840DA97A7F37723233DD335613E1E95F9F32E9';
+        $merchantSerialNumber = '26840DA97A7F37723DRTYUHE9';
         
         return $merchantSerialNumber;
     }
@@ -31,7 +31,7 @@ class DemoConfig extends Config {
      */
     public function getMerchantPrivateKey()
     {
-        $merchantPrivateKey = PemUtil::loadPrivateKey(BASE_DIR. '/../../programs/wxpay/WXCertUtil/cert/apiclient_key.pem');
+        $merchantPrivateKey = PemUtil::loadPrivateKey(BASE_DIR. '/../../cert/apiclient_key.pem');
         
         return $merchantPrivateKey;
     }
@@ -41,7 +41,7 @@ class DemoConfig extends Config {
      */
     public function getWechatpayCertificate()
     {
-        $wechatpayCertificate = PemUtil::loadCertificate(BASE_DIR. '/../../programs/wxpay/WXCertUtil/cert/apiclient_cert.pem');
+        $wechatpayCertificate = PemUtil::loadCertificate(BASE_DIR. '/../../cert/apiclient_cert.pem');
         
         return $wechatpayCertificate;
     }
@@ -51,7 +51,7 @@ class DemoConfig extends Config {
      */
     public function getAppId()
     {
-        return 'wxc1134a1cdd87716b';
+        return 'wxc113434th870hk';
     }
     
 }

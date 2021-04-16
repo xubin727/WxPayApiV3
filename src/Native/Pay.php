@@ -7,6 +7,7 @@ use \GuzzleHttp\HandlerStack;
 use WechatPay\GuzzleMiddleware\WechatPayMiddleware;
 use Xubin\WxPayApiV3\Loger\Log;
 use Xubin\WxPayApiV3\Loger\CLogFileHandler;
+use Xubin\WxPayApiV3\Util\Aes;
 
 
 class Pay {
@@ -64,7 +65,7 @@ class Pay {
 
     /**
      * 初始化日志对象
-     * @return \xubin\wxpayapi\Loger\Log
+     * @return \Xubin\WxPayApiV3\Loger\Log
      */
     protected function initLoger()
     {
@@ -145,6 +146,17 @@ class Pay {
         }
 
 
+    }
+    
+    
+    public function notifyDecode($data)
+    {
+        $secretKey = $this->config->getMerchantPrivateKey();
+        
+        $aes = new Aes($secretKey);
+        $res = $aes->decryptToString($data['resource']['associated_data'], $data['resource']['nonce'], $data['resource']['ciphertext']);
+        var_dump( $res );
+        return $res;
     }
 
 }
