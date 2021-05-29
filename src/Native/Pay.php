@@ -7,7 +7,7 @@ use \GuzzleHttp\HandlerStack;
 use WechatPay\GuzzleMiddleware\WechatPayMiddleware;
 use Xubin\WxPayApiV3\Loger\Log;
 use Xubin\WxPayApiV3\Loger\CLogFileHandler;
-use Xubin\WxPayApiV3\Util\Aes;
+use WechatPay\GuzzleMiddleware\Util\AesUtil;
 
 
 class Pay {
@@ -26,7 +26,7 @@ class Pay {
     public function __construct(Config $config)
     {
         $this->config = $config;
-
+        
         $merchantId = $this->config->getMerchantId();
         $merchantSerialNumber = $this->config->getMerchantSerialNumber();
         $merchantPrivateKey = $this->config->getMerchantPrivateKey();
@@ -82,17 +82,19 @@ class Pay {
      * @param string $orderId 商家订单ID
      * @param string $notifyUrl 支付成功后的回调地址
      * @param string $orderDesc 订单描述信息
+     * @param string $logPath 日志路径
      * @param array $params 其它参数
      * @param array $headers 支付请求向支付服务器发送的头信息
      * @return mixed|array 成功则返回正常的json信息，否则返回一个空的数组
      */
-    public function createOrder($amount, $orderId, $notifyUrl, $orderDesc, $params=[], $headers=[])
+    public function createOrder($amount, $orderId, $notifyUrl, $orderDesc, $logPath, $params=[], $headers=[])
     {
 
-//         $loger = $this->setLogPath($logPath)->initLoger();
+        $this->setLogPath($logPath);
+        $loger = $this->loger;
 
 //         $prod_id = '123';
-        $this->loger->INFO($this->logPath);
+        $loger->INFO($this->logPath);
         
         $str = json_encode([
             'appid' => $this->config->getAppId(),
@@ -132,15 +134,15 @@ class Pay {
                 ],
                 'headers' => [ 'Accept' => 'application/json' ]
             ]);
-            $this->loger->INFO( $resp->getStatusCode().' '.$resp->getReasonPhrase());
+            $loger->INFO( $resp->getStatusCode().' '.$resp->getReasonPhrase());
             return json_decode($resp->getBody(), JSON_OBJECT_AS_ARRAY);
 
 
         } catch (RequestException $e) {
             // 进行错误处理
-            $this->loger->ERROR( $e->getMessage().'json:' .$str );
+            $loger->ERROR( $e->getMessage().'json:' .$str );
             if ($e->hasResponse()) {
-                $this->loger->INFO( $e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase().' '.$e->getResponse()->getBody() );
+                $loger->INFO( $e->getResponse()->getStatusCode().' '.$e->getResponse()->getReasonPhrase().' '.$e->getResponse()->getBody() );
             }
             return json_decode($e->getResponse()->getBody(), JSON_OBJECT_AS_ARRAY);
         }
@@ -148,17 +150,54 @@ class Pay {
 
     }
     
-    
-    public function notifyDecode($data)
+    /**
+     * 回调解密内容
+     * @param string $data
+     * @param string $logPath
+     * @return string|boolean
+     */
+    public function notifyDecode($data, $logPath='')
     {
-        $secretKey = $this->config->getMerchantPrivateKey();
+        $this->setLogPath($logPath);
+//         $loger = $this->loger;
         
-        $aes = new Aes($secretKey);
+        $data = json_decode($data, JSON_OBJECT_AS_ARRAY);
+        $apiv3key = $this->config->getApiV3Key();
+        $aes = new AesUtil($apiv3key);
         $res = $aes->decryptToString($data['resource']['associated_data'], $data['resource']['nonce'], $data['resource']['ciphertext']);
         
-        $this->loger->DEBUG( json_encode($res) );
+//         $loger->DEBUG( 'pay168:'. $res );
         
         return $res;
+    }
+    
+    /**
+     * 回调签名验证
+     * @param string $postData 应答报文主体
+     * @return bool|void
+     */
+    public function notifyCheck($postData)
+    {
+        $headers = getallheaders();
+        \Yii::log("notify headers: " . json_encode($headers), 'info', 'pay');
+        
+        $WechatpaySerial = $headers['Wechatpay-Serial']; // 证书序列号
+        if ($this->config->getMerchantSerialNumber() != $WechatpaySerial) { // 证书序列号不正确，直接退出 ?
+            /**
+             * @todo 重新获取证书
+             */
+            //exit;
+        }
+        $WechatpayTimestamp = $headers['Wechatpay-Timestamp']; // 应答时间戳
+        $WechatpayNonce = $headers['Wechatpay-Nonce']; // 应答随机串
+        $WechatpaySignature = $headers['Wechatpay-Signature']; // 接收到的签名
+        $string = $WechatpayTimestamp . "\n" . $WechatpayNonce . "\n" . $postData . "\n"; // 验签名串
+        $signature = base64_decode($WechatpaySignature); // 解密后的应答签名
+        /**
+         * @todo 签名验证
+         */
+        
+        return true;
     }
 
 }
